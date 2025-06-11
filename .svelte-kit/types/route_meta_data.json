@@ -51,10 +51,20 @@
 	"/api/donations": [
 		"src/routes/api/donations/+server.ts"
 	],
+	"/api/mpesa/callback": [
+		"src/routes/api/mpesa/callback/+server.ts"
+	],
+	"/api/mpesa/stk-push": [
+		"src/routes/api/mpesa/stk-push/+server.ts"
+	],
 	"/api/projects": [
 		"src/routes/api/projects/+server.ts"
 	],
 	"/api/projects/[id]": [
 		"src/routes/api/projects/[id]/+server.ts"
+	],
+	"/transactions": [
+		"src/routes/transactions/+page.server.ts",
+		"src/routes/+layout.server.ts"
 	]
 }
