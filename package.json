@@ -34,10 +34,12 @@
 	},
 	"dependencies": {
 		"@types/bcrypt": "^5.0.2",
+		"@types/jsonwebtoken": "^9.0.9",
 		"bcrypt": "^6.0.0",
 		"chart.js": "^4.4.9",
 		"dotenv": "^16.5.0",
 		"exceljs": "^4.4.0",
+		"jsonwebtoken": "^9.0.2",
 		"jspdf": "^3.0.1",
 		"jspdf-autotable": "^5.0.2",
 		"mongodb": "^6.17.0",
