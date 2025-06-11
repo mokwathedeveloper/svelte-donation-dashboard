@@ -5,27 +5,19 @@ export interface IAdmin extends mongoose.Document {
     username: string;
     password: string;
     superAdmin: boolean;
+    secretKey?: string;
     createdAt: Date;
     updatedAt: Date;
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const adminSchema = new mongoose.Schema<IAdmin>({
-    username: { 
-        type: String, 
-        required: true, 
-        unique: true 
-    },
-    password: { 
-        type: String, 
-        required: true 
-    },
-    superAdmin: { 
-        type: Boolean, 
-        default: false 
-    }
-}, {
-    timestamps: true
+const adminSchema = new mongoose.Schema({
+    username: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    superAdmin: { type: Boolean, default: false },
+    secretKey: { type: String, select: false }, // Only stored for super admin
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
 });
 
 // Hash password before saving
@@ -50,4 +42,12 @@ adminSchema.methods.comparePassword = async function(candidatePassword: string):
     }
 };
 
-export const Admin = mongoose.models.Admin || mongoose.model<IAdmin>('Admin', adminSchema); 
+// Static method to verify secret key
+adminSchema.statics.verifySecretKey = async function(secretKey: string): Promise<boolean> {
+    const superAdmin = await this.findOne({ superAdmin: true }).select('+secretKey');
+    if (!superAdmin) return false;
+    return secretKey === superAdmin.secretKey;
+};
+
+export const Admin = (mongoose.models.Admin as mongoose.Model<IAdmin>) || 
+    mongoose.model<IAdmin>('Admin', adminSchema); 

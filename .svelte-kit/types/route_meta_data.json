@@ -12,6 +12,12 @@
 	"/admin/login": [
 		"src/routes/+layout.server.ts"
 	],
+	"/admin/manage": [
+		"src/routes/+layout.server.ts"
+	],
+	"/admin/signup": [
+		"src/routes/+layout.server.ts"
+	],
 	"/api/admin/login": [
 		"src/routes/api/admin/login/+server.ts"
 	],
@@ -20,6 +26,9 @@
 	],
 	"/api/admin/password": [
 		"src/routes/api/admin/password/+server.ts"
+	],
+	"/api/admin/signup": [
+		"src/routes/api/admin/signup/+server.ts"
 	],
 	"/api/callback": [
 		"src/routes/api/callback/+server.ts"
