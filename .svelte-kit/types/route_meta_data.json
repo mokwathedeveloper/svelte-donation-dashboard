@@ -1,12 +1,17 @@
 {
 	"/": [
 		"src/routes/+page.ts",
-		"src/routes/+page.server.ts"
+		"src/routes/+page.server.ts",
+		"src/routes/+layout.server.ts",
+		"src/routes/+layout.server.ts"
 	],
 	"/admin/dashboard": [
-		"src/routes/admin/dashboard/+page.server.ts"
+		"src/routes/admin/dashboard/+page.server.ts",
+		"src/routes/+layout.server.ts"
 	],
-	"/admin/login": [],
+	"/admin/login": [
+		"src/routes/+layout.server.ts"
+	],
 	"/api/admin/login": [
 		"src/routes/api/admin/login/+server.ts"
 	],

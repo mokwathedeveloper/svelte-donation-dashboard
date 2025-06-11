@@ -5,6 +5,8 @@ import { Project } from '$lib/server/models/project';
 import { Donation } from '$lib/models/Donation';
 import type { SerializedProject } from '$lib/server/models/project';
 import type { Types } from 'mongoose';
+import type { PageServerLoad } from './$types';
+import type { RequestEvent } from '@sveltejs/kit';
 
 interface RawDonation {
     _id: Types.ObjectId;
@@ -37,58 +39,29 @@ interface SerializedDonation {
     updatedAt: string;
 }
 
-export const load: ServerLoad = async () => {
+export const load = async ({ cookies }: RequestEvent) => {
+    const adminData = cookies.get('admin');
+    if (!adminData) {
+        throw error(401, 'Unauthorized');
+    }
+
     try {
         await connectDB();
-
-        // Fetch projects
-        const rawProjects = await Project.find()
-            .sort({ createdAt: -1 })
-            .lean();
-
-        const projects = rawProjects.map(project => ({
-            _id: project._id.toString(),
-            title: project.title,
-            description: project.description,
-            goal: project.goal,
-            raised: project.raised,
-            image: project.image,
-            createdAt: project.createdAt.toISOString(),
-            updatedAt: project.updatedAt.toISOString()
-        }));
-
-        // Fetch donations with project details
-        const rawDonations = await Donation.find()
-            .populate('projectId')
-            .sort({ createdAt: -1 })
-            .lean();
-
-        const donations = (rawDonations as unknown as RawDonation[]).map(donation => ({
-            _id: donation._id.toString(),
-            projectId: {
-                _id: donation.projectId._id.toString(),
-                title: donation.projectId.title,
-                description: donation.projectId.description,
-                goal: donation.projectId.goal,
-                raised: donation.projectId.raised,
-                image: donation.projectId.image,
-                createdAt: donation.projectId.createdAt.toISOString(),
-                updatedAt: donation.projectId.updatedAt.toISOString()
-            },
-            amount: donation.amount,
-            phone: donation.phone,
-            status: donation.status,
-            transactionId: donation.transactionId,
-            createdAt: donation.createdAt.toISOString(),
-            updatedAt: donation.updatedAt.toISOString()
-        }));
+        const projects = await Project.find().sort({ createdAt: -1 }).lean();
+        const donations = []; // TODO: Implement donations
 
         return {
-            projects,
-            donations
+            projects: projects.map(p => ({
+                ...p,
+                _id: p._id.toString(),
+                createdAt: p.createdAt.toISOString(),
+                updatedAt: p.updatedAt.toISOString()
+            })),
+            donations,
+            admin: JSON.parse(adminData)
         };
-    } catch (error) {
-        console.error('Failed to load admin data:', error);
-        throw error;
+    } catch (err) {
+        console.error('Failed to load dashboard data:', err);
+        throw error(500, 'Failed to load dashboard data');
     }
 }; 

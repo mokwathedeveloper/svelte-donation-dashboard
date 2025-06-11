@@ -4,8 +4,9 @@
     import { goto } from '$app/navigation';
     import type { SerializedProject } from '$lib/server/models/project';
     import { showSuccessToast, showErrorToast } from '$lib/utils/toast';
+    import { page } from '$app/stores';
 
-    export let data: { projects: SerializedProject[], donations: any[] };
+    export let data: { projects: SerializedProject[], donations: any[], admin: any };
     let projects = data.projects;
     let donations = data.donations;
     let loading = false;
@@ -25,17 +26,24 @@
         confirmPassword: ''
     };
 
-    // No need for onMount and loadProjects since we get data from the server load function
+    $: if (!$page.data.admin) {
+        goto('/admin/login');
+    }
 
     async function handleCreateProject() {
+        if (loading) return;
         try {
+            loading = true;
             const response = await fetch('/api/projects', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newProject)
             });
 
-            if (!response.ok) throw new Error('Failed to create project');
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Failed to create project');
+            }
 
             const createdProject = await response.json();
             projects = [createdProject, ...projects];
@@ -43,64 +51,90 @@
             newProject = { title: '', description: '', goal: 0, image: '' };
             showSuccessToast('Project created successfully');
         } catch (error) {
-            showErrorToast('Failed to create project');
+            console.error('Create project error:', error);
+            showErrorToast(error instanceof Error ? error.message : 'Failed to create project');
+        } finally {
+            loading = false;
         }
     }
 
     async function handleUpdateProject() {
-        if (!editingProject) return;
+        if (!editingProject || loading) return;
 
         try {
+            loading = true;
             const response = await fetch(`/api/projects/${editingProject._id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(editingProject)
             });
 
-            if (!response.ok) throw new Error('Failed to update project');
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Failed to update project');
+            }
 
             const updatedProject = await response.json();
             projects = projects.map(p => p._id === updatedProject._id ? updatedProject : p);
             editingProject = null;
             showSuccessToast('Project updated successfully');
         } catch (error) {
-            showErrorToast('Failed to update project');
+            console.error('Update project error:', error);
+            showErrorToast(error instanceof Error ? error.message : 'Failed to update project');
+        } finally {
+            loading = false;
         }
     }
 
     async function handleDeleteProject(id: string) {
-        if (!confirm('Are you sure you want to delete this project?')) return;
+        if (!confirm('Are you sure you want to delete this project?') || loading) return;
 
         try {
+            loading = true;
             const response = await fetch(`/api/projects/${id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             });
 
-            if (!response.ok) throw new Error('Failed to delete project');
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Failed to delete project');
+            }
 
             projects = projects.filter(p => p._id !== id);
             showSuccessToast('Project deleted successfully');
         } catch (error) {
-            showErrorToast('Failed to delete project');
+            console.error('Delete project error:', error);
+            showErrorToast(error instanceof Error ? error.message : 'Failed to delete project');
+        } finally {
+            loading = false;
         }
     }
 
     async function handleLogout() {
+        if (loading) return;
         try {
+            loading = true;
             await fetch('/api/admin/logout', { method: 'POST' });
             goto('/admin/login');
         } catch (error) {
             showErrorToast('Failed to logout');
+        } finally {
+            loading = false;
         }
     }
 
     async function handlePasswordChange() {
+        if (loading) return;
         if (passwordData.newPassword !== passwordData.confirmPassword) {
             showErrorToast('New passwords do not match');
             return;
         }
 
         try {
+            loading = true;
             const response = await fetch('/api/admin/password', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -124,6 +158,8 @@
             };
         } catch (error) {
             showErrorToast(error instanceof Error ? error.message : 'Failed to change password');
+        } finally {
+            loading = false;
         }
     }
 </script>

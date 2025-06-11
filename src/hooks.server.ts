@@ -1,42 +1,28 @@
 import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
-    const session = event.cookies.get('session');
+    // Get admin data from cookies
     const adminData = event.cookies.get('admin');
-
-    // Check if accessing admin routes
+    
+    // Check if this is an admin route
     if (event.url.pathname.startsWith('/admin')) {
-        // Allow access to login page
-        if (event.url.pathname === '/admin/login') {
-            // If already logged in, redirect to dashboard
-            if (session && adminData) {
-                return new Response(null, {
-                    status: 302,
-                    headers: { Location: '/admin/dashboard' }
-                });
-            }
-            return resolve(event);
+        // If no admin cookie and not on login page, redirect to login
+        if (!adminData && !event.url.pathname.endsWith('/login')) {
+            return new Response('Redirect', { status: 303, headers: { Location: '/admin/login' } });
         }
+    }
 
-        // Protect all other admin routes
-        if (!session || !adminData) {
-            return new Response(null, {
-                status: 302,
-                headers: { Location: '/admin/login' }
-            });
-        }
-
-        // Add admin data to event.locals
-        try {
-            event.locals.admin = JSON.parse(adminData);
-        } catch (error) {
-            console.error('Failed to parse admin data:', error);
-            return new Response(null, {
-                status: 302,
-                headers: { Location: '/admin/login' }
+    // Check if this is an API route that requires admin auth
+    if (event.url.pathname.startsWith('/api/projects') && 
+        (event.request.method === 'DELETE' || event.request.method === 'PUT' || event.request.method === 'POST')) {
+        if (!adminData) {
+            return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+                status: 401,
+                headers: { 'Content-Type': 'application/json' }
             });
         }
     }
 
-    return resolve(event);
+    const response = await resolve(event);
+    return response;
 }; 
