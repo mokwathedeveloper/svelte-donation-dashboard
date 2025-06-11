@@ -8,7 +8,17 @@ export const POST: RequestHandler = async ({ request }) => {
     try {
         const { username, password, secretKey, isSuperAdmin } = await request.json();
 
+        if (!username || !password) {
+            return json({ error: 'Username and password are required' }, { status: 400 });
+        }
+
         await connectDB();
+
+        // Check if password is unique
+        const isPasswordUnique = await Admin.isPasswordUnique(password);
+        if (!isPasswordUnique) {
+            return json({ error: 'Password is already in use by another admin' }, { status: 400 });
+        }
 
         // Check if any admin exists
         const adminExists = await Admin.findOne({ superAdmin: true });
@@ -50,10 +60,10 @@ export const POST: RequestHandler = async ({ request }) => {
         await admin.save();
         return json({ success: true, message: 'Admin created successfully' });
     } catch (error) {
-        console.error('Signup error:', error);
-        if (error instanceof Error && error.message.includes('duplicate key')) {
-            return json({ error: 'Username already exists' }, { status: 400 });
+        console.error('Failed to create admin:', error);
+        if (error.name === 'ValidationError') {
+            return json({ error: error.message }, { status: 400 });
         }
-        return json({ error: 'Failed to create admin account' }, { status: 500 });
+        return json({ error: 'Failed to create admin' }, { status: 500 });
     }
 }; 
