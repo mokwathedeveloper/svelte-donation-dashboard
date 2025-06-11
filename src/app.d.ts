@@ -3,12 +3,11 @@
 declare global {
   namespace App {
     interface Locals {
-      authenticated: boolean;
-      admin?: {
+      user: {
         id: string;
         username: string;
         superAdmin: boolean;
-      };
+      } | null;
     }
   }
 }

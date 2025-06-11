@@ -2,56 +2,45 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { connectDB } from '$lib/db/mongodb';
 import { Admin } from '$lib/server/models/admin';
+import { createToken } from '$lib/server/jwt';
 
-export const POST: RequestHandler = async ({ request, cookies }) => {
+export const POST: RequestHandler = async ({ request }) => {
     try {
-        await connectDB();
         const { username, password } = await request.json();
+        
+        if (!username || !password) {
+            return json({ error: 'Username and password are required' }, { status: 400 });
+        }
 
-        // Find admin by username
+        await connectDB();
+        
         const admin = await Admin.findOne({ username });
         if (!admin) {
             return json({ error: 'Invalid credentials' }, { status: 401 });
         }
 
-        // Verify password
-        const isValid = await admin.comparePassword(password);
-        if (!isValid) {
+        const isValidPassword = await admin.comparePassword(password);
+        if (!isValidPassword) {
             return json({ error: 'Invalid credentials' }, { status: 401 });
         }
 
-        // Set session cookie
-        const sessionId = crypto.randomUUID();
-        cookies.set('session', sessionId, {
-            path: '/',
-            httpOnly: true,
-            sameSite: 'strict',
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 60 * 60 * 24 // 24 hours
-        });
-
-        // Store admin info in session
-        cookies.set('admin', JSON.stringify({
+        // Create JWT token
+        const token = createToken({
             id: admin._id.toString(),
             username: admin.username,
             superAdmin: admin.superAdmin
-        }), {
-            path: '/',
-            httpOnly: true,
-            sameSite: 'strict',
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 60 * 60 * 24 // 24 hours
         });
 
-        return json({ 
-            success: true,
-            admin: {
+        return json({
+            token,
+            user: {
+                id: admin._id,
                 username: admin.username,
                 superAdmin: admin.superAdmin
             }
         });
     } catch (error) {
         console.error('Login error:', error);
-        return json({ error: 'Failed to process login' }, { status: 500 });
+        return json({ error: 'Failed to login' }, { status: 500 });
     }
 }; 
