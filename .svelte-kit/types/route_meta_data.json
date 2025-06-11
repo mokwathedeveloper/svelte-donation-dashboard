@@ -5,6 +5,12 @@
 		"src/routes/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	],
+	"/admin/analysis": [
+		"src/routes/+layout.server.ts"
+	],
+	"/admin/chat": [
+		"src/routes/+layout.server.ts"
+	],
 	"/admin/dashboard": [
 		"src/routes/admin/dashboard/+page.server.ts",
 		"src/routes/+layout.server.ts"
@@ -17,6 +23,15 @@
 	],
 	"/admin/signup": [
 		"src/routes/+layout.server.ts"
+	],
+	"/api/admin/analytics": [
+		"src/routes/api/admin/analytics/+server.ts"
+	],
+	"/api/admin/chat/history": [
+		"src/routes/api/admin/chat/history/+server.ts"
+	],
+	"/api/admin/chat/send": [
+		"src/routes/api/admin/chat/send/+server.ts"
 	],
 	"/api/admin/login": [
 		"src/routes/api/admin/login/+server.ts"
