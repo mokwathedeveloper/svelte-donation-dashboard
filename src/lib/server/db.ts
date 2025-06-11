@@ -1,50 +1,31 @@
 import mongoose from 'mongoose';
+import * as dotenv from 'dotenv';
 
-// Free MongoDB Atlas cluster URL
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://donation-platform:donation-platform-pass@cluster0.mongodb.net/donation-platform?retryWrites=true&w=majority';
+// Load environment variables from .env file
+dotenv.config();
+
+const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
-    throw new Error('Please define the MONGODB_URI environment variable');
+  throw new Error('Please define the MONGODB_URI environment variable inside .env');
 }
 
-interface Cached {
-    conn: typeof mongoose | null;
-    promise: Promise<typeof mongoose> | null;
-}
+export async function connectDB() {
+  try {
+    const opts = {
+      bufferCommands: false,
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    };
 
-declare global {
-    var mongoose: Cached | undefined;
-}
-
-let cached: Cached = global.mongoose || { conn: null, promise: null };
-
-if (!global.mongoose) {
-    global.mongoose = cached;
-}
-
-async function connectDB() {
-    if (cached.conn) {
-        return cached.conn;
-    }
-
-    if (!cached.promise) {
-        const opts = {
-            bufferCommands: false,
-        };
-
-        cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-            return mongoose;
-        });
-    }
-
-    try {
-        cached.conn = await cached.promise;
-    } catch (e) {
-        cached.promise = null;
-        throw e;
-    }
-
-    return cached.conn;
-}
-
-export default connectDB; 
+    console.log('Creating database connection');
+    const connection = await mongoose.connect(MONGODB_URI as string, opts);
+    console.log('Database connected successfully');
+    mongoose.set('debug', true);
+    return connection;
+  } catch (e) {
+    console.error('MongoDB connection error:', e);
+    throw e;
+  }
+} 

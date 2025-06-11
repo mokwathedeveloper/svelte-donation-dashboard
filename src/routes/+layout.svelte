@@ -4,40 +4,49 @@
 	import { onMount } from 'svelte';
 	import Toast from '$lib/components/Toast.svelte';
 
-	let theme = browser ? localStorage.getItem('theme') || 'light' : 'light';
+	let theme = 'light';
+	let mounted = false;
 
 	function toggleTheme() {
 		theme = theme === 'light' ? 'dark' : 'light';
 		if (browser) {
 			localStorage.setItem('theme', theme);
+			updateThemeClass();
 		}
 	}
 
-	onMount(() => {
-		// Check system preference
-		if (browser && !localStorage.getItem('theme')) {
-			const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-			theme = prefersDark ? 'dark' : 'light';
-			localStorage.setItem('theme', theme);
-		}
-	});
-
-	$: if (browser) {
+	function updateThemeClass() {
 		if (theme === 'dark') {
 			document.documentElement.classList.add('dark');
 		} else {
 			document.documentElement.classList.remove('dark');
 		}
 	}
+
+	onMount(() => {
+		if (browser) {
+			const savedTheme = localStorage.getItem('theme');
+			if (savedTheme) {
+				theme = savedTheme;
+			} else {
+				const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+				theme = prefersDark ? 'dark' : 'light';
+				localStorage.setItem('theme', theme);
+			}
+			updateThemeClass();
+			mounted = true;
+		}
+	});
 </script>
 
+{#if mounted}
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-	<nav class="bg-white dark:bg-gray-800 shadow">
-		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-			<div class="flex justify-between h-16">
+	<nav class="bg-white dark:bg-gray-800 shadow fixed w-full top-0 z-40">
+		<div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+			<div class="flex justify-between h-14 sm:h-16">
 				<div class="flex">
 					<div class="flex-shrink-0 flex items-center">
-						<a href="/" class="text-xl font-bold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+						<a href="/" class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
 							Donation Platform
 						</a>
 					</div>
@@ -63,18 +72,27 @@
 		</div>
 	</nav>
 
-	<main class="flex-1">
+	<main class="flex-1 pt-14 sm:pt-16">
 		<slot></slot>
 	</main>
 
 	<Toast />
 </div>
+{:else}
+<div class="min-h-screen bg-gray-50">
+	<main class="flex-1">
+		<slot></slot>
+	</main>
+</div>
+{/if}
 
 <style>
 	:global(body) {
 		margin: 0;
 		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,
 			'Helvetica Neue', sans-serif;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
 	}
 
 	:global(.toast) {

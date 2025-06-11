@@ -1,0 +1,31 @@
+{
+	"/": [
+		"src/routes/+page.ts",
+		"src/routes/+page.server.ts"
+	],
+	"/admin/dashboard": [
+		"src/routes/admin/dashboard/+page.server.ts"
+	],
+	"/admin/login": [],
+	"/api/admin/login": [
+		"src/routes/api/admin/login/+server.ts"
+	],
+	"/api/admin/logout": [
+		"src/routes/api/admin/logout/+server.ts"
+	],
+	"/api/admin/password": [
+		"src/routes/api/admin/password/+server.ts"
+	],
+	"/api/callback": [
+		"src/routes/api/callback/+server.ts"
+	],
+	"/api/donations": [
+		"src/routes/api/donations/+server.ts"
+	],
+	"/api/projects": [
+		"src/routes/api/projects/+server.ts"
+	],
+	"/api/projects/[id]": [
+		"src/routes/api/projects/[id]/+server.ts"
+	]
+}
