@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://mokwa:mokwa123@donation.ulqppbq.mongodb.net/donation-platform?retryWrites=true&w=majority&appName=donation';
 
 let cachedConnection: typeof mongoose | null = null;
 
