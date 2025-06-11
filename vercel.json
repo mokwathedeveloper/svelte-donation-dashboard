@@ -1,0 +1,15 @@
+{
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "sveltekit",
+  "regions": ["fra1"],
+  "env": {
+    "MONGODB_URI": "REQUIRED",
+    "MPESA_CONSUMER_KEY": "REQUIRED",
+    "MPESA_CONSUMER_SECRET": "REQUIRED",
+    "MPESA_PASSKEY": "REQUIRED",
+    "MPESA_SHORTCODE": "REQUIRED",
+    "MPESA_CALLBACK_URL": "REQUIRED"
+  }
+} 
