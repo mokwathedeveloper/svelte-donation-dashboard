@@ -4,7 +4,6 @@ import { browser } from '$app/environment';
 interface User {
     id: string;
     username: string;
-    superAdmin: boolean;
 }
 
 interface AuthState {

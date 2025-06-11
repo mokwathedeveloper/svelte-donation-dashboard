@@ -2,22 +2,22 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
 export interface IAdmin extends mongoose.Document {
+    _id: mongoose.Types.ObjectId;
     username: string;
     password: string;
-    superAdmin: boolean;
-    secretKey?: string;
     createdAt: Date;
     updatedAt: Date;
+    isModified(path: string): boolean;
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const adminSchema = new mongoose.Schema({
+const adminSchema = new mongoose.Schema<IAdmin>({
     username: { type: String, required: true, unique: true },
     password: { 
         type: String, 
         required: true,
-        validate: {
-            validator: async function(password: string) {
+        validate: [{
+            validator: async function(this: IAdmin, password: string) {
                 if (this.isModified('password')) {
                     // Check if password is already in use
                     const count = await mongoose.models.Admin.countDocuments({
@@ -29,10 +29,8 @@ const adminSchema = new mongoose.Schema({
                 return true;
             },
             message: 'Password is already in use by another admin'
-        }
+        }]
     },
-    superAdmin: { type: Boolean, default: false },
-    secretKey: { type: String, select: false }, // Only stored for super admin
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });
@@ -57,13 +55,6 @@ adminSchema.methods.comparePassword = async function(candidatePassword: string):
     } catch (error) {
         throw error;
     }
-};
-
-// Static method to verify secret key
-adminSchema.statics.verifySecretKey = async function(secretKey: string): Promise<boolean> {
-    const superAdmin = await this.findOne({ superAdmin: true }).select('+secretKey');
-    if (!superAdmin) return false;
-    return secretKey === superAdmin.secretKey;
 };
 
 // Static method to check if password is unique

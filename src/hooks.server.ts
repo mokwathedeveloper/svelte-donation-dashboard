@@ -31,22 +31,8 @@ const handleAuth: Handle = async ({ event, resolve }) => {
     // Add user info to event.locals
     event.locals.user = {
         id: payload.id,
-        username: payload.username,
-        superAdmin: payload.superAdmin
+        username: payload.username
     };
-
-    // For routes requiring super admin
-    if (event.url.pathname.startsWith('/admin/manage') && !payload.superAdmin) {
-        return new Response('Forbidden', { status: 403 });
-    }
-
-    // For routes requiring any admin (regular or super)
-    if (event.url.pathname.startsWith('/admin/analysis') || 
-        event.url.pathname.startsWith('/admin/chat') ||
-        event.url.pathname.startsWith('/api/admin/analytics') ||
-        event.url.pathname.startsWith('/api/admin/chat')) {
-        return resolve(event);
-    }
 
     return resolve(event);
 };

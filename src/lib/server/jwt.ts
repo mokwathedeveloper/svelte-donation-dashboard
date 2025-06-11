@@ -3,8 +3,7 @@ import { env } from '$env/dynamic/private';
 
 export interface JWTPayload {
     id: string;
-    email: string;
-    role: string;
+    username: string;
 }
 
 const getJwtSecret = () => {

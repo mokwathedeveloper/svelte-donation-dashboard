@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { connectDB } from '$lib/db/mongodb';
-import { Admin } from '$lib/server/models/admin';
+import { Admin, type IAdmin } from '$lib/server/models/admin';
 import { createToken } from '$lib/server/jwt';
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -14,7 +14,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
         await connectDB();
         
-        const admin = await Admin.findOne({ username });
+        const admin = await Admin.findOne({ username }).exec() as IAdmin | null;
         if (!admin) {
             return json({ error: 'Invalid credentials' }, { status: 401 });
         }
@@ -27,16 +27,14 @@ export const POST: RequestHandler = async ({ request }) => {
         // Create JWT token
         const token = createToken({
             id: admin._id.toString(),
-            username: admin.username,
-            superAdmin: admin.superAdmin
+            username: admin.username
         });
 
         return json({
             token,
             user: {
-                id: admin._id,
-                username: admin.username,
-                superAdmin: admin.superAdmin
+                id: admin._id.toString(),
+                username: admin.username
             }
         });
     } catch (error) {
