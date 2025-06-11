@@ -27,9 +27,6 @@
  */
 declare module '$env/static/private' {
 	export const MONGODB_URI: string;
-	export const SESSION_SECRET: string;
-	export const SUPER_ADMIN_SECRET: string;
-	export const JWT_SECRET: string;
 	export const GJS_DEBUG_TOPICS: string;
 	export const LESSOPEN: string;
 	export const GHOSTTY_RESOURCES_DIR: string;
@@ -175,9 +172,6 @@ declare module '$env/static/public' {
 declare module '$env/dynamic/private' {
 	export const env: {
 		MONGODB_URI: string;
-		SESSION_SECRET: string;
-		SUPER_ADMIN_SECRET: string;
-		JWT_SECRET: string;
 		GJS_DEBUG_TOPICS: string;
 		LESSOPEN: string;
 		GHOSTTY_RESOURCES_DIR: string;
