@@ -174,18 +174,40 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <button
-                        on:click={() => showPasswordModal = true}
-                        class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
-                    >
-                        Change Password
-                    </button>
-                    <button
-                        on:click={handleLogout}
-                        class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
-                    >
-                        Logout
-                    </button>
+                    {#if $page.data.admin}
+                        <a
+                            href="/admin/analysis"
+                            class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
+                        >
+                            Analytics
+                        </a>
+                        <a
+                            href="/admin/chat"
+                            class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
+                        >
+                            Chat
+                        </a>
+                        {#if $page.data.admin.superAdmin}
+                            <a
+                                href="/admin/manage"
+                                class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
+                            >
+                                Manage Admins
+                            </a>
+                        {/if}
+                        <button
+                            on:click={() => showPasswordModal = true}
+                            class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
+                        >
+                            Change Password
+                        </button>
+                        <button
+                            on:click={handleLogout}
+                            class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
+                        >
+                            Logout
+                        </button>
+                    {/if}
                 </div>
             </div>
         </div>

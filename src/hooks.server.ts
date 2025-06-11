@@ -40,6 +40,14 @@ const handleAuth: Handle = async ({ event, resolve }) => {
         return new Response('Forbidden', { status: 403 });
     }
 
+    // For routes requiring any admin (regular or super)
+    if (event.url.pathname.startsWith('/admin/analysis') || 
+        event.url.pathname.startsWith('/admin/chat') ||
+        event.url.pathname.startsWith('/api/admin/analytics') ||
+        event.url.pathname.startsWith('/api/admin/chat')) {
+        return resolve(event);
+    }
+
     return resolve(event);
 };
 
