@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { connectDB } from '$lib/db/mongodb';
 import { Admin } from '$lib/server/models/admin';
-import { SUPER_ADMIN_SECRET } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 export const POST: RequestHandler = async ({ request }) => {
     try {
@@ -30,7 +30,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
         // For super admin signup
         if (isSuperAdmin) {
-            if (secretKey !== SUPER_ADMIN_SECRET) {
+            if (secretKey !== env.SUPER_ADMIN_SECRET) {
                 return json({ error: 'Invalid secret key' }, { status: 401 });
             }
 
