@@ -1,4 +1,4 @@
-import { connectDB } from './db';
+import { connectDB } from '$lib/db/mongodb';
 import { Project } from './models/project';
 
 const sampleProjects = [
