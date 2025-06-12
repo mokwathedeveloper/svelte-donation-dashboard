@@ -6,13 +6,12 @@
     let loading = false;
     let formData = {
         username: '',
-        password: '',
-        secretKey: ''
+        password: ''
     };
 
     async function handleSubmit() {
         if (loading) return;
-        if (!formData.username || !formData.password || !formData.secretKey) {
+        if (!formData.username || !formData.password) {
             showErrorToast('All fields are required');
             return;
         }
@@ -22,21 +21,18 @@
             const response = await fetch('/api/admin/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...formData,
-                    isSuperAdmin: true
-                })
+                body: JSON.stringify(formData)
             });
 
             const data = await response.json();
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to create super admin');
+                throw new Error(data.error || 'Failed to create admin account');
             }
 
-            showSuccessToast('Super admin created successfully');
+            showSuccessToast('Admin account created successfully');
             goto('/admin/login');
         } catch (error) {
-            showErrorToast(error instanceof Error ? error.message : 'Failed to create super admin');
+            showErrorToast(error instanceof Error ? error.message : 'Failed to create admin account');
         } finally {
             loading = false;
         }
@@ -47,10 +43,10 @@
     <div class="max-w-md w-full space-y-8">
         <div>
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-                Create Super Admin Account
+                Create Admin Account
             </h2>
             <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                First time setup - Create the super admin account
+                Sign up to manage the donation platform
             </p>
         </div>
         <form class="mt-8 space-y-6" on:submit|preventDefault={handleSubmit}>
@@ -74,20 +70,8 @@
                         type="password"
                         required
                         bind:value={formData.password}
-                        class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm dark:bg-gray-700"
-                        placeholder="Password"
-                        disabled={loading}
-                    />
-                </div>
-                <div>
-                    <label for="secretKey" class="sr-only">Secret Key</label>
-                    <input
-                        id="secretKey"
-                        type="password"
-                        required
-                        bind:value={formData.secretKey}
                         class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-b-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm dark:bg-gray-700"
-                        placeholder="Secret Key"
+                        placeholder="Password"
                         disabled={loading}
                     />
                 </div>
@@ -106,16 +90,16 @@
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                         </span>
-                        Creating...
+                        Creating account...
                     {:else}
-                        Create Super Admin
+                        Create account
                     {/if}
                 </button>
             </div>
 
             <div class="text-center">
                 <a href="/admin/login" class="font-medium text-primary-600 hover:text-primary-500">
-                    Back to Login
+                    Already have an account? Sign in
                 </a>
             </div>
         </form>
