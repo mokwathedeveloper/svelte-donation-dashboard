@@ -5,6 +5,7 @@
     import type { SerializedProject } from '$lib/server/models/project';
     import { showSuccessToast, showErrorToast } from '$lib/utils/toast';
     import { page } from '$app/stores';
+    import { auth } from '$lib/stores/auth';
 
     export let data: { projects: SerializedProject[], donations: any[], admin: any };
     let projects = data.projects;
@@ -26,9 +27,13 @@
         confirmPassword: ''
     };
 
-    $: if (!$page.data.admin) {
+    // Check both client-side auth store and server-side admin data
+    $: if (!$auth.user && !data.admin) {
         goto('/admin/login');
     }
+
+    // Use either client-side or server-side admin data
+    $: currentAdmin = $auth.user || data.admin;
 
     async function handleCreateProject() {
         if (loading) return;
@@ -174,7 +179,7 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    {#if $page.data.admin}
+                    {#if currentAdmin}
                         <a
                             href="/admin/analysis"
                             class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
