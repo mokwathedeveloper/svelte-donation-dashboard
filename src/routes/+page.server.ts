@@ -1,48 +1,31 @@
-import type { PageServerLoad } from './$types';
 import { connectDB } from '$lib/db/mongodb';
-import { Project } from '$lib/server/models/project';
-import type { SerializedProject } from '$lib/server/models/project';
-import { error } from '@sveltejs/kit';
+import { Project, type SerializedProject } from '$lib/server/models/project';
+import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-  try {
-    // Ensure MongoDB is connected
-    await connectDB();
-    
-    // Fetch projects
-    const rawProjects = await Project.find()
-      .sort({ createdAt: -1 })
-      .lean()
-      .exec();
-      
-    console.log('Raw projects fetched:', 
-      rawProjects.map(p => ({ 
-        _id: p._id?.toString(), 
-        title: p.title,
-        goal: p.goal,
-        raised: p.raised 
-      }))
-    );
+    try {
+        await connectDB();
+        const projects = await Project.find().lean();
+        
+        // Properly serialize MongoDB documents
+        const serializedProjects = projects.map(project => ({
+            _id: project._id.toString(),
+            title: project.title,
+            description: project.description,
+            goal: project.goal,
+            raised: project.raised,
+            image: project.image,
+            createdAt: project.createdAt.toISOString(),
+            updatedAt: project.updatedAt.toISOString()
+        }));
 
-    const serializedProjects: SerializedProject[] = rawProjects.map((project: any) => ({
-      _id: project._id.toString(),
-      title: project.title,
-      description: project.description,
-      goal: project.goal,
-      raised: project.raised,
-      image: project.image,
-      createdAt: project.createdAt,
-      updatedAt: project.updatedAt
-    }));
-
-    console.log('Successfully serialized all projects');
-    
-    return {
-      projects: serializedProjects
-    };
-  } catch (err) {
-    console.error('Error in load function:', err);
-    const errorMessage = err instanceof Error ? err.message : 'Internal server error';
-    throw error(500, errorMessage);
-  }
+        return {
+            projects: serializedProjects
+        };
+    } catch (error) {
+        console.error('Error loading projects:', error);
+        return {
+            projects: []
+        };
+    }
 }; 

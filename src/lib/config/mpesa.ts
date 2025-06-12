@@ -1,25 +1,34 @@
 import { env } from '$env/dynamic/private';
 
-export const mpesaConfig = {
-    consumerKey: env.MPESA_CONSUMER_KEY || 'Lv2LBAMlXJHSg23GUGg9eV5ubPunDEzkHAClzfaiMZMeZtM8',
-    consumerSecret: env.MPESA_CONSUMER_SECRET || '9E2OZL2d3E8zmawcrRAqRsA8ZED2UW8bZbV8dbClvDivBxmRoP5J8YdEojtAXApD',
-    passkey: env.MPESA_PASSKEY || 'bfb279f9aa9bdbcf158e97dd71a4',
-    shortcode: env.MPESA_SHORTCODE || '174379',
-    initiatorName: env.MPESA_INITIATOR_NAME || 'testapi',
-    initiatorPassword: env.MPESA_INITIATOR_PASSWORD || 'Safaricom123!',
-    callbackUrl: env.MPESA_CALLBACK_URL || 'https://mydomain.com/path',
-    environment: env.NODE_ENV === 'production' ? 'production' : 'sandbox',
-    baseUrls: {
-        sandbox: 'https://sandbox.safaricom.co.ke',
-        production: 'https://api.safaricom.co.ke',
-    }
+// M-Pesa Configuration
+export const MPESA_CONFIG = {
+    consumerKey: env.MPESA_CONSUMER_KEY,
+    consumerSecret: env.MPESA_CONSUMER_SECRET,
+    passkey: env.MPESA_PASSKEY,
+    shortcode: env.MPESA_SHORTCODE,
+    callbackUrl: env.MPESA_CALLBACK_URL,
+    baseUrl: 'https://sandbox.safaricom.co.ke'
 } as const;
 
-export type MpesaConfig = typeof mpesaConfig;
+// Validate required environment variables
+export function validateMpesaConfig() {
+    const required = [
+        'MPESA_CONSUMER_KEY',
+        'MPESA_CONSUMER_SECRET',
+        'MPESA_PASSKEY',
+        'MPESA_SHORTCODE',
+        'MPESA_CALLBACK_URL'
+    ];
+
+    const missing = required.filter(key => !env[key]);
+    if (missing.length > 0) {
+        throw new Error(`Missing required M-Pesa configuration: ${missing.join(', ')}`);
+    }
+}
+
+export type MpesaConfig = typeof MPESA_CONFIG;
 
 // Helper function to get the base URL based on environment
-export const getMpesaBaseUrl = () => {
-    return mpesaConfig.environment === 'production' 
-        ? mpesaConfig.baseUrls.production 
-        : mpesaConfig.baseUrls.sandbox;
-}; 
+export function getMpesaBaseUrl(): string {
+    return 'https://sandbox.safaricom.co.ke';
+} 

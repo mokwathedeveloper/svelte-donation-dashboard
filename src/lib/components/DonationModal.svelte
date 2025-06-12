@@ -9,8 +9,49 @@
     let amount = '';
     let phone = '';
     let loading = false;
+    let isValidPhone = false;
 
     const dispatch = createEventDispatcher();
+
+    function formatPhoneNumber(input: string): string {
+        // Remove all non-digit characters
+        const cleaned = input.replace(/\D/g, '');
+        
+        // Format based on the length and starting digits
+        if (cleaned.startsWith('254')) {
+            return cleaned;
+        } else if (cleaned.startsWith('0')) {
+            return `254${cleaned.slice(1)}`;
+        } else if (cleaned.startsWith('7') || cleaned.startsWith('1')) {
+            return `254${cleaned}`;
+        }
+        return cleaned;
+    }
+
+    function validatePhoneNumber(phone: string): boolean {
+        const formatted = formatPhoneNumber(phone);
+        // Check if it's a valid Safaricom number (254 followed by 7/1 and 8 more digits)
+        return /^254[17]\d{8}$/.test(formatted);
+    }
+
+    function handlePhoneInput(e: Event) {
+        const input = e.target as HTMLInputElement;
+        const cursorPos = input.selectionStart || 0;
+        const oldLength = input.value.length;
+        
+        // Format the number
+        const formatted = formatPhoneNumber(input.value);
+        phone = formatted;
+        
+        // Update validation state
+        isValidPhone = validatePhoneNumber(formatted);
+        
+        // Restore cursor position accounting for length change
+        setTimeout(() => {
+            const newPos = Math.max(0, cursorPos + (formatted.length - oldLength));
+            input.setSelectionRange(newPos, newPos);
+        }, 0);
+    }
 
     function handleClose() {
         if (!loading) {
@@ -22,15 +63,36 @@
         e.preventDefault();
         if (loading) return;
 
+        // Validate phone number
+        if (!validatePhoneNumber(phone)) {
+            showErrorToast('Please enter a valid Safaricom phone number (e.g., 254712345678)');
+            return;
+        }
+
         try {
             loading = true;
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            const response = await fetch('/api/donations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    projectId: project._id,
+                    amount: parseFloat(amount),
+                    phone: formatPhoneNumber(phone)
+                })
+            });
 
-            showSuccessToast('Payment initiated. Please check your phone for the M-Pesa prompt.');
-            setTimeout(() => {
-                dispatch('close');
-            }, 3000);
+            const result = await response.json();
+
+            if (response.ok) {
+                showSuccessToast('Payment initiated. Please check your phone for the M-Pesa prompt.');
+                setTimeout(() => {
+                    dispatch('close');
+                }, 3000);
+            } else {
+                showErrorToast(result.error || 'Failed to process donation');
+            }
         } catch (e) {
             showErrorToast(e instanceof Error ? e.message : 'An unexpected error occurred');
         } finally {
@@ -93,12 +155,18 @@
                         id="phone"
                         bind:value={phone}
                         placeholder="254712345678"
-                        pattern="^254[0-9]{9}$"
                         required
-                        class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:text-white text-base sm:text-lg px-3 py-2"
+                        class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:text-white text-base sm:text-lg px-3 py-2 {!isValidPhone && phone ? 'border-red-500' : ''}"
                         disabled={loading}
+                        on:input={handlePhoneInput}
                     />
-                    <p class="mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">Format: 254XXXXXXXXX</p>
+                    <p class="mt-1 text-sm {!isValidPhone && phone ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'}">
+                        {#if !isValidPhone && phone}
+                            Please enter a valid Safaricom number (e.g., 254712345678)
+                        {:else}
+                            Format: 254712345678, 0712345678, or 712345678
+                        {/if}
+                    </p>
                 </div>
 
                 <div class="flex justify-end space-x-3 mt-6">

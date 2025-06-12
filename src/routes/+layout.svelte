@@ -37,7 +37,8 @@
 	async function handleLogout() {
 		try {
 			const response = await fetch('/api/admin/logout', {
-				method: 'POST'
+				method: 'POST',
+				credentials: 'include'
 			});
 			if (response.ok) {
 				auth.logout();
