@@ -96,9 +96,9 @@
 
             <div class="text-center">
                 <a href="/admin/signup" class="font-medium text-primary-600 hover:text-primary-500">
-                    Create super admin account
+                    Create admin account
                 </a>
             </div>
         </form>
     </div>
-</div> 
+</div>
