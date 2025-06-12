@@ -18,23 +18,43 @@ const handleAuth: Handle = async ({ event, resolve }) => {
         return resolve(event);
     }
 
+    // Check for JWT token in Authorization header
     const token = getTokenFromRequest(event.request);
-    if (!token) {
+    let isAuthenticated = false;
+
+    if (token) {
+        try {
+            const payload = verifyToken(token);
+            event.locals.user = {
+                id: payload.id,
+                username: payload.username
+            };
+            isAuthenticated = true;
+        } catch (error) {
+            console.error('JWT verification failed:', error);
+        }
+    }
+
+    // If JWT auth failed, check for cookie auth
+    if (!isAuthenticated) {
+        const adminData = event.cookies.get('admin');
+        if (adminData) {
+            try {
+                const admin = JSON.parse(adminData);
+                event.locals.user = admin;
+                isAuthenticated = true;
+            } catch (error) {
+                console.error('Failed to parse admin cookie:', error);
+            }
+        }
+    }
+
+    // If neither auth method worked, return unauthorized
+    if (!isAuthenticated) {
         return new Response('Unauthorized', { status: 401 });
     }
-
-    const payload = verifyToken(token);
-    if (!payload) {
-        return new Response('Invalid token', { status: 401 });
-    }
-
-    // Add user info to event.locals
-    event.locals.user = {
-        id: payload.id,
-        username: payload.username
-    };
 
     return resolve(event);
 };
 
-export const handle = sequence(handleAuth); 
+export const handle = sequence(handleAuth);
