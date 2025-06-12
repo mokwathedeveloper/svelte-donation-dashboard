@@ -12,3 +12,4 @@ vite.config.ts.timestamp-*
 .output
 .vercel_build_output
 .netlify
+.svelte-kit/
