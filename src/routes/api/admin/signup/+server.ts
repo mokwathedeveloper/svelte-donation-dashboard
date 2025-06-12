@@ -20,13 +20,6 @@ export const POST: RequestHandler = async ({ request }) => {
             return json({ error: 'Username already exists' }, { status: 400 });
         }
 
-        // Check if password is already in use
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const existingPasswordAdmin = await Admin.findOne({ password: hashedPassword });
-        if (existingPasswordAdmin) {
-            return json({ error: 'Password is already in use by another admin' }, { status: 400 });
-        }
-
         const admin = new Admin({
             username,
             password

@@ -63,6 +63,9 @@
 	"/api/projects/[id]": [
 		"src/routes/api/projects/[id]/+server.ts"
 	],
+	"/test-env": [
+		"src/routes/test-env/+server.ts"
+	],
 	"/transactions": [
 		"src/routes/transactions/+page.server.ts",
 		"src/routes/+layout.server.ts"

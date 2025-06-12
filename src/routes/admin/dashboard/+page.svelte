@@ -187,14 +187,6 @@
                         >
                             Chat
                         </a>
-                        {#if $page.data.admin.superAdmin}
-                            <a
-                                href="/admin/manage"
-                                class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
-                            >
-                                Manage Admins
-                            </a>
-                        {/if}
                         <button
                             on:click={() => showPasswordModal = true}
                             class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"

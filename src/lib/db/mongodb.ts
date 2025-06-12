@@ -32,18 +32,14 @@ export async function connectDB(): Promise<typeof mongoose> {
         mongoose.set('strictQuery', true);
         
         // Connect with timeout and options
-        const connection = await Promise.race([
-            mongoose.connect(MONGODB_URI, {
-                maxPoolSize: 10,
-                serverSelectionTimeoutMS: 5000,
-                socketTimeoutMS: 45000,
-                family: 4,
-                connectTimeoutMS: 10000
-            }),
-            new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Database connection timeout after 5000ms')), 5000)
-            )
-        ]) as typeof mongoose;
+        const connection = await mongoose.connect(MONGODB_URI, {
+            maxPoolSize: 10,
+            serverSelectionTimeoutMS: 30000,
+            socketTimeoutMS: 45000,
+            connectTimeoutMS: 30000,
+            retryWrites: true,
+            retryReads: true
+        });
 
         // Verify connection state
         console.log('Connection established, checking state...');

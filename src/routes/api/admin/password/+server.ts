@@ -27,12 +27,6 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
             return json({ error: 'Current password is incorrect' }, { status: 400 });
         }
 
-        // Check if new password is unique
-        const isPasswordUnique = await Admin.isPasswordUnique(newPassword, admin._id.toString());
-        if (!isPasswordUnique) {
-            return json({ error: 'Password is already in use by another admin' }, { status: 400 });
-        }
-
         // Update password
         admin.password = newPassword;
         await admin.save();
