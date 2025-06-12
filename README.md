@@ -7,9 +7,10 @@ A modern, responsive donation platform built with SvelteKit and integrated with 
 - 🎯 Multiple donation projects support
 - 💳 M-Pesa payment integration
 - 📱 Responsive design
-- 🔒 Secure admin dashboard
+- 🔒 Secure admin dashboard with dual authentication
 - 📊 Real-time donation tracking
 - 🌐 MongoDB database integration
+- 🔐 JWT and Cookie-based authentication
 
 ## Live Projects
 
@@ -25,6 +26,7 @@ Currently supporting the following causes:
 - **Backend**: Node.js
 - **Database**: MongoDB
 - **Payment**: M-Pesa API
+- **Authentication**: JWT + HTTP-only Cookies
 - **Deployment**: Vercel
 
 ## Prerequisites
@@ -35,6 +37,51 @@ Before you begin, ensure you have the following:
 - MongoDB Atlas account
 - M-Pesa API credentials (Safaricom Developer Account)
 - Vercel account (for deployment)
+
+## Authentication System
+
+The application uses a dual authentication system for enhanced security:
+
+1. **JWT Token Authentication**
+   - Used for API requests
+   - Stored in memory (not in localStorage)
+   - Auto-refresh mechanism
+
+2. **HTTP-only Cookie Authentication**
+   - Used for session management
+   - Secure and HttpOnly flags
+   - SameSite protection
+
+### Security Features
+- Password hashing with bcrypt
+- CSRF protection
+- Rate limiting
+- Secure session management
+- XSS protection
+
+## Environment Variables
+
+Create a `.env` file in the root directory with the following variables:
+
+```env
+# Database
+MONGODB_URI=your_mongodb_connection_string
+
+# Authentication
+JWT_SECRET=your_jwt_secret
+COOKIE_SECRET=your_cookie_secret
+
+# M-Pesa Integration
+MPESA_CONSUMER_KEY=your_mpesa_consumer_key
+MPESA_CONSUMER_SECRET=your_mpesa_consumer_secret
+MPESA_PASSKEY=your_mpesa_passkey
+MPESA_SHORTCODE=your_mpesa_shortcode
+MPESA_CALLBACK_URL=your_mpesa_callback_url
+
+# Admin Configuration
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=your_admin_password
+```
 
 ## M-Pesa Integration Details
 
@@ -90,23 +137,6 @@ Before you begin, ensure you have the following:
 4. Implement webhook for status updates
 5. Handle timeout scenarios
 
-## Environment Variables
-
-Create a `.env` file in the root directory with the following variables:
-
-```env
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-MPESA_CONSUMER_KEY=your_mpesa_consumer_key
-MPESA_CONSUMER_SECRET=your_mpesa_consumer_secret
-MPESA_PASSKEY=your_mpesa_passkey
-MPESA_SHORTCODE=your_mpesa_shortcode
-MPESA_CALLBACK_URL=your_mpesa_callback_url
-ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=your_admin_password
-SUPER_ADMIN_SECRET=your_super_admin_secret
-```
-
 ## Installation
 
 1. Clone the repository:
@@ -139,6 +169,11 @@ Login for admin users
   "password": "string"
 }
 ```
+
+Response includes both JWT token and session cookie.
+
+#### POST /api/admin/logout
+Logout admin user (clears both JWT and cookie)
 
 #### POST /api/admin/signup
 Create new admin account
@@ -305,26 +340,23 @@ vercel
 
 ### Common Issues and Solutions
 
-1. **TypeScript Configuration Warning**
-```
-Cannot find base config file "./.svelte-kit/tsconfig.json"
-```
-Solution:
-```bash
-npm run sync
-# or
-npx svelte-kit sync
-```
+1. **Authentication Issues**
+- Clear browser cookies and local storage
+- Check both JWT token and cookie presence
+- Verify JWT_SECRET is properly set
+- Ensure cookie settings match your domain
 
 2. **MongoDB Connection Issues**
 - Check MongoDB Atlas IP whitelist
 - Verify connection string format
 - Ensure network connectivity
+- Check MongoDB user permissions
 
 3. **M-Pesa API Errors**
 - Verify phone number format (254XXXXXXXXX)
 - Check API credentials
 - Ensure callback URL is accessible
+- Monitor rate limits
 
 4. **Build Errors**
 - Clear .svelte-kit directory:
@@ -337,6 +369,13 @@ npm run dev
 - Check environment variables
 - Verify build output
 - Review Vercel deployment logs
+- Ensure all secrets are properly set
+
+6. **Session Management Issues**
+- Check cookie domain settings
+- Verify HTTPS in production
+- Monitor session expiration
+- Check cross-origin settings
 
 ### Debug Mode
 
@@ -345,6 +384,12 @@ Enable debug mode by setting:
 DEBUG=true
 VITE_DEBUG=true
 ```
+
+This will:
+- Enable detailed error logging
+- Show authentication flow details
+- Log API request/response cycles
+- Display database queries
 
 ## Screenshots
 
