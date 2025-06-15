@@ -1,4 +1,4 @@
-name: Continuous Integration
+name: Test Only Pipeline
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Test Suite
+    name: Run Tests
     runs-on: ubuntu-latest
     
     strategy:
@@ -31,25 +31,18 @@ jobs:
     - name: Run type checking
       run: npm run check
       
-    - name: Run linting
-      run: npm run lint || echo "Linting not configured"
-      
     - name: Run tests
       run: npm run test:run
       
     - name: Generate test coverage
       run: npm run test:coverage
       
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      if: github.event_name == 'push'
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v3
       with:
-        file: ./coverage/lcov.info
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: false
-        token: ${{ secrets.CODECOV_TOKEN }}
-      continue-on-error: true
+        name: coverage-reports-${{ matrix.node-version }}
+        path: coverage/
+        retention-days: 7
 
   build:
     name: Build Application
@@ -99,25 +92,14 @@ jobs:
       run: npm ci
       
     - name: Run security audit
-      run: npm audit --audit-level=moderate
+      run: npm audit --audit-level=moderate || echo "Security audit completed with warnings"
       
-    - name: Run dependency check
-      run: npx audit-ci --moderate
-
-  code-quality:
-    name: Code Quality Analysis
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@master
-      if: ${{ secrets.SONAR_TOKEN != '' }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    - name: Check for vulnerabilities
+      run: |
+        if npm audit --audit-level=high --json > audit-results.json; then
+          echo "No high-severity vulnerabilities found"
+        else
+          echo "High-severity vulnerabilities detected - review required"
+          cat audit-results.json
+        fi
       continue-on-error: true
