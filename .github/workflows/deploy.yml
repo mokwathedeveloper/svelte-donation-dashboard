@@ -45,7 +45,6 @@ jobs:
         
     - name: Deploy to Vercel (Staging)
       uses: amondnet/vercel-action@v25
-      if: ${{ secrets.VERCEL_TOKEN != '' }}
       with:
         vercel-token: ${{ secrets.VERCEL_TOKEN }}
         vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
@@ -56,7 +55,6 @@ jobs:
         
     - name: Deploy to Netlify (Alternative)
       uses: nwtgck/actions-netlify@v2.1
-      if: ${{ secrets.NETLIFY_AUTH_TOKEN != '' }}
       with:
         publish-dir: '.svelte-kit/output/client'
         production-branch: main
@@ -100,7 +98,6 @@ jobs:
         
     - name: Deploy to Vercel (Production)
       uses: amondnet/vercel-action@v25
-      if: ${{ secrets.VERCEL_TOKEN != '' }}
       with:
         vercel-token: ${{ secrets.VERCEL_TOKEN }}
         vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
@@ -122,7 +119,7 @@ jobs:
         
     - name: Notify deployment success
       uses: 8398a7/action-slack@v3
-      if: ${{ success() && secrets.SLACK_WEBHOOK_URL != '' }}
+      if: success()
       with:
         status: success
         channel: '#deployments'
@@ -145,7 +142,6 @@ jobs:
       
     - name: Login to Docker Hub
       uses: docker/login-action@v3
-      if: ${{ secrets.DOCKER_USERNAME != '' }}
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
@@ -164,7 +160,6 @@ jobs:
           
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
-      if: ${{ secrets.DOCKER_USERNAME != '' }}
       with:
         context: .
         push: true
