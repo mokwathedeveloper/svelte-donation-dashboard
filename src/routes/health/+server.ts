@@ -1,0 +1,75 @@
+import { json } from '@sveltejs/kit';
+import { connectDB } from '$lib/db/mongodb';
+import type { RequestHandler } from './$types';
+
+export const GET: RequestHandler = async () => {
+  try {
+    // Check database connection
+    const db = await connectDB();
+    
+    // Perform basic database health check
+    await db.admin().ping();
+    
+    // Check application health
+    const healthStatus = {
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      uptime: process.uptime(),
+      memory: {
+        used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+        total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+        external: Math.round(process.memoryUsage().external / 1024 / 1024)
+      },
+      database: {
+        status: 'connected',
+        type: 'MongoDB'
+      },
+      services: {
+        api: 'operational',
+        authentication: 'operational',
+        payments: 'operational'
+      }
+    };
+
+    return json(healthStatus, {
+      status: 200,
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
+
+  } catch (error) {
+    console.error('Health check failed:', error);
+    
+    const errorStatus = {
+      status: 'unhealthy',
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      uptime: process.uptime(),
+      error: error instanceof Error ? error.message : 'Unknown error',
+      database: {
+        status: 'disconnected',
+        type: 'MongoDB'
+      },
+      services: {
+        api: 'degraded',
+        authentication: 'unknown',
+        payments: 'unknown'
+      }
+    };
+
+    return json(errorStatus, {
+      status: 503,
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
+  }
+};

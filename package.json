@@ -14,8 +14,19 @@
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "test:watch": "vitest --watch",
+    "lint": "eslint . --ext .js,.ts,.svelte",
+    "lint:fix": "eslint . --ext .js,.ts,.svelte --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "seed": "node src/lib/scripts/seed.js",
-    "create-super-admin": "node src/lib/scripts/createSuperAdmin.js"
+    "create-super-admin": "node src/lib/scripts/createSuperAdmin.js",
+    "docker:build": "docker build -t donation-platform .",
+    "docker:run": "docker run -p 3000:3000 donation-platform",
+    "docker:dev": "docker-compose up -d",
+    "docker:prod": "docker-compose -f docker-compose.prod.yml up -d",
+    "deploy:staging": "bash scripts/deploy.sh staging",
+    "deploy:production": "bash scripts/deploy.sh production",
+    "health": "node healthcheck.js"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.0.0",
