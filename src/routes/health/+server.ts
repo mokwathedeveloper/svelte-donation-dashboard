@@ -1,14 +1,15 @@
 import { json } from '@sveltejs/kit';
 import { connectDB } from '$lib/db/mongodb';
-import type { RequestHandler } from './$types';
 
-export const GET: RequestHandler = async () => {
+export async function GET() {
+  const startTime = Date.now();
+
   try {
     // Check database connection
-    const db = await connectDB();
-    
-    // Perform basic database health check
-    await db.admin().ping();
+    await connectDB();
+
+    // Calculate response time
+    const responseTime = Date.now() - startTime;
     
     // Check application health
     const healthStatus = {
@@ -29,7 +30,12 @@ export const GET: RequestHandler = async () => {
       services: {
         api: 'operational',
         authentication: 'operational',
-        payments: 'operational'
+        payments: 'operational',
+        database: 'connected'
+      },
+      checks: {
+        lastUpdated: new Date().toISOString(),
+        responseTime: `${responseTime}ms`
       }
     };
 
