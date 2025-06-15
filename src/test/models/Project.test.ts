@@ -45,9 +45,12 @@ describe('Project Model', () => {
       };
 
       mockProjectModel.create.mockResolvedValue({
-        ...mockProject,
         ...projectData,
-        _id: 'new-project-id'
+        _id: 'new-project-id',
+        raised: 0,
+        status: 'active',
+        createdAt: new Date(),
+        updatedAt: new Date()
       });
 
       const result = await mockProjectModel.create(projectData);

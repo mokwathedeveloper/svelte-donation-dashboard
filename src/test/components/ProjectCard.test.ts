@@ -85,9 +85,9 @@ describe('ProjectCard Component', () => {
       };
 
       // Should use fallback image or placeholder
-      const hasImage = component.props.project.imageUrl && 
-                      component.props.project.imageUrl.trim() !== '';
-      
+      const hasImage = !!(component.props.project.imageUrl &&
+                         component.props.project.imageUrl.trim() !== '');
+
       expect(hasImage).toBe(false);
     });
 
